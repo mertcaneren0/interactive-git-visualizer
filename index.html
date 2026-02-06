@@ -25,6 +25,30 @@
                     <span class="dot green"></span>
                 </div>
                 <div class="terminal-title">Git Commands</div>
+                <button class="scenario-toggle-btn" id="scenarioToggle">
+                    <i class="ph ph-graduation-cap"></i> Learn
+                </button>
+            </div>
+
+            <!-- Scenario Panel (hidden by default) -->
+            <div class="scenario-panel hidden" id="scenarioPanel">
+                <div class="scenario-header">
+                    <h4><i class="ph ph-graduation-cap"></i> Guided Scenarios</h4>
+                    <button class="scenario-close" id="scenarioClose"><i class="ph ph-x"></i></button>
+                </div>
+                <div class="scenario-list" id="scenarioList">
+                    <!-- Scenarios injected by JS -->
+                </div>
+            </div>
+
+            <!-- Active scenario step bar -->
+            <div class="scenario-step-bar hidden" id="scenarioStepBar">
+                <div class="step-info">
+                    <span class="step-title" id="stepTitle"></span>
+                    <span class="step-progress" id="stepProgress"></span>
+                </div>
+                <div class="step-instruction" id="stepInstruction"></div>
+                <button class="step-quit" id="stepQuit"><i class="ph ph-x"></i> Quit</button>
             </div>
 
             <div class="terminal-content" id="commandList">
@@ -372,11 +396,28 @@
             </div>
 
             <div class="cards-grid">
+                <!-- Flow arrows between zones -->
+                <div class="flow-arrow flow-arrow-1" id="arrow-add">
+                    <span class="flow-label">git add</span>
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+                <div class="flow-arrow flow-arrow-2" id="arrow-commit">
+                    <span class="flow-label">git commit</span>
+                    <i class="ph ph-arrow-right"></i>
+                </div>
+                <div class="flow-arrow flow-arrow-3" id="arrow-push">
+                    <span class="flow-label">git push</span>
+                    <i class="ph ph-arrow-down"></i>
+                </div>
+
                 <!-- Zone 1: Working Directory -->
                 <div class="zone-card" id="zone-working">
                     <div class="card-header">
                         <span class="zone-icon"><i class="ph ph-folder"></i></span>
-                        <h3>Working Directory</h3>
+                        <div class="card-header-text">
+                            <h3>Working Directory</h3>
+                            <span class="zone-desc">Your project folder — files you edit live here</span>
+                        </div>
                     </div>
                     <div class="file-container" id="files-working">
                         <!-- Files injected by JS -->
@@ -387,7 +428,10 @@
                 <div class="zone-card" id="zone-staging">
                     <div class="card-header">
                         <span class="zone-icon"><i class="ph ph-package"></i></span>
-                        <h3>Staging Area</h3>
+                        <div class="card-header-text">
+                            <h3>Staging Area</h3>
+                            <span class="zone-desc">Changes selected for next commit</span>
+                        </div>
                     </div>
                     <div class="file-container" id="files-staging">
                         <!-- Files injected by JS -->
@@ -398,7 +442,10 @@
                 <div class="zone-card" id="zone-local">
                     <div class="card-header">
                         <span class="zone-icon"><i class="ph ph-floppy-disk"></i></span>
-                        <h3>Local Repository</h3>
+                        <div class="card-header-text">
+                            <h3>Local Repository</h3>
+                            <span class="zone-desc">Commit history saved on your computer</span>
+                        </div>
                     </div>
                     <div class="file-container" id="files-local">
                         <!-- Files injected by JS -->
@@ -409,7 +456,10 @@
                 <div class="zone-card full-width" id="zone-remote">
                     <div class="card-header">
                         <span class="zone-icon"><i class="ph ph-cloud"></i></span>
-                        <h3>Remote Repository (GitHub)</h3>
+                        <div class="card-header-text">
+                            <h3>Remote Repository (GitHub)</h3>
+                            <span class="zone-desc">Cloud server — share code with your team</span>
+                        </div>
                     </div>
                     <div class="file-container" id="files-remote">
                         <!-- Files injected by JS -->

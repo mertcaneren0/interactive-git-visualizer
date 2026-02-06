@@ -122,6 +122,171 @@ body {
     letter-spacing: 2px;
 }
 
+/* Scenario Toggle Button */
+.scenario-toggle-btn {
+    padding: 4px 10px;
+    background: transparent;
+    color: var(--terminal-green);
+    border: 1px solid var(--terminal-dim-green);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+
+.scenario-toggle-btn:hover {
+    background: var(--terminal-dark-green);
+    border-color: var(--terminal-green);
+    box-shadow: 0 0 8px var(--terminal-green);
+}
+
+/* Scenario Panel */
+.scenario-panel {
+    border-bottom: 1px solid var(--terminal-dim-green);
+    padding: 12px;
+    background: rgba(0, 20, 0, 0.9);
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.scenario-header h4 {
+    font-size: 13px;
+    color: var(--terminal-green);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.scenario-close {
+    background: none;
+    border: 1px solid var(--text-dim);
+    color: var(--text-dim);
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scenario-close:hover {
+    border-color: var(--terminal-green);
+    color: var(--terminal-green);
+}
+
+.scenario-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.scenario-item {
+    padding: 10px;
+    background: #000;
+    border: 1px solid var(--terminal-dim-green);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.scenario-item:hover {
+    border-color: var(--terminal-green);
+    background: var(--terminal-dark-green);
+    box-shadow: 0 0 8px rgba(0, 255, 65, 0.2);
+}
+
+.scenario-item-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--terminal-green);
+    margin-bottom: 3px;
+}
+
+.scenario-item-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+}
+
+.scenario-item-steps {
+    font-size: 9px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    opacity: 0.7;
+}
+
+/* Active Scenario Step Bar */
+.scenario-step-bar {
+    padding: 10px 12px;
+    background: rgba(0, 40, 0, 0.95);
+    border-bottom: 2px solid var(--terminal-green);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: step-glow 2s infinite alternate;
+}
+
+@keyframes step-glow {
+    from { border-bottom-color: var(--terminal-green); }
+    to { border-bottom-color: var(--terminal-dim-green); }
+}
+
+.step-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+
+.step-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--terminal-green);
+}
+
+.step-progress {
+    font-size: 9px;
+    color: var(--text-dim);
+}
+
+.step-instruction {
+    font-size: 11px;
+    color: #fff;
+    flex: 2;
+    padding: 4px 8px;
+    background: rgba(0, 255, 65, 0.08);
+    border-left: 2px solid var(--terminal-green);
+}
+
+.step-quit {
+    padding: 3px 8px;
+    background: transparent;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    font-family: inherit;
+    font-size: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.step-quit:hover {
+    background: #ff4444;
+    color: #000;
+}
+
 .terminal-content {
     flex: 1;
     overflow-y: auto;
@@ -235,7 +400,7 @@ body {
 .cmd-desc {
     display: none;
     position: fixed;
-    left: 380px;
+    left: 480px;
     width: 280px;
     max-height: 200px;
     overflow-y: auto;
@@ -403,6 +568,60 @@ body {
     box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
 }
 
+/* Flow Arrows */
+.cards-grid {
+    position: relative;
+}
+
+.flow-arrow {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    z-index: 10;
+    pointer-events: none;
+    color: var(--text-dim);
+    font-size: 18px;
+    opacity: 0.6;
+    transition: opacity 0.3s, color 0.3s;
+}
+
+.flow-arrow.active {
+    opacity: 1;
+    color: var(--terminal-green);
+    filter: drop-shadow(0 0 6px var(--terminal-green));
+}
+
+.flow-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+/* Working -> Staging arrow */
+.flow-arrow-1 {
+    top: 50%;
+    left: calc(33.33% - 10px);
+    transform: translate(-50%, -50%);
+}
+
+/* Staging -> Local arrow */
+.flow-arrow-2 {
+    top: 50%;
+    left: calc(66.66% - 10px);
+    transform: translate(-50%, -50%);
+}
+
+/* Local -> Remote arrow (vertical) */
+.flow-arrow-3 {
+    top: calc(55%);
+    right: calc(33.33% / 2);
+    transform: translate(50%, 0);
+}
+
 .full-width {
     grid-column: 1 / -1;
 }
@@ -416,9 +635,22 @@ body {
     gap: 10px;
 }
 
+.card-header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
 .card-header h3 {
     font-size: 14px;
     text-transform: uppercase;
+}
+
+.zone-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-weight: 400;
+    font-style: italic;
 }
 
 .file-container {

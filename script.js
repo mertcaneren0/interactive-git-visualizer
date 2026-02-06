@@ -43,126 +43,12 @@ class GitVisualizer {
         // --- Event Listeners ---
         this.initEventListeners();
 
+        // --- Scenarios ---
+        this.initScenarios();
+
         // --- Initial Render ---
         this.renderAll();
     }
-
-    // --- Command Implementations ---
-
-    // ... existing cmdInit / cmdAdd / cmdCommit ...
-
-    cmdStatus() {
-        const wCount = this.state.files.working.length;
-        const sCount = this.state.files.staging.length;
-        const cCount = this.state.files.local.length; // Local implies current branch commits? 
-        // For simplicity, let's say 'local' stores all commits linearly or filtered by branch.
-        // Complex branch logic would require 'local' to be a map of branch -> commits.
-        // For this demo, we'll keep it simple: just show current branch name.
-
-        this.showInfo('Git Status', `🌿 On branch ${this.state.branch}\n\nFiles in Working Dir: ${wCount}\nFiles Staged: ${sCount}\nCurrent Commits: ${cCount}`);
-    }
-
-    cmdDiff(cmd) {
-        // Visual Diff Simulation
-        const isStaged = cmd === 'diff-staged';
-        const title = isStaged ? 'Diff (Staged)' : 'Diff (Working)';
-
-        // Mock Diff Content
-        const diffContent = `
-diff --git a/style.css b/style.css
-index 14b8...e69de 100644
---- a/style.css
-+++ b/style.css
-@@ -40,7 +40,7 @@
--    background: #000;
-+    background: #00ff41; /* Hacker Green */
-     color: white;
- `;
-
-        this.showInfo(title, `📝 SIMULATED DIFF OUTPUT:\n${diffContent}`);
-    }
-
-    async cmdBranch(cmd) {
-        if (cmd === 'branch-list' || cmd === 'branch') {
-            const list = this.state.branches.map(b =>
-                b === this.state.branch ? `* ${b}` : `  ${b}`
-            ).join('\n');
-            this.showInfo('Branch List', `🌿 Local Branches:\n${list}`);
-            return;
-        }
-
-        if (cmd === 'branch-create') {
-            const name = prompt("Enter new branch name:");
-            if (!name) return;
-            if (this.state.branches.includes(name)) {
-                this.showInfo('Error', `Branch '${name}' already exists.`);
-                return;
-            }
-            this.state.branches.push(name);
-            await this.animatePackage('zone-local', 'zone-local', '🌿'); // Spawn effect
-            this.showInfo('Branch Created', `✅ Created branch '${name}' from '${this.state.branch}'`);
-        }
-    }
-
-    async cmdCheckout(cmd) {
-        // Handle checkout -b
-        if (cmd === 'checkout-b') {
-            const name = prompt("Enter new branch name to create and switch:");
-            if (!name) return;
-            if (this.state.branches.includes(name)) {
-                this.showInfo('Error', `Branch '${name}' already exists.`);
-                return;
-            }
-            this.state.branches.push(name);
-            this.state.branch = name;
-            this.showInfo('Checkout', `🔄 Switched to a new branch '${name}'`);
-            this.renderAll(); // Re-render to update status/visuals if needed
-            return;
-        }
-
-        const name = prompt("Enter branch name to switch to:");
-        if (!name) return;
-
-        if (!this.state.branches.includes(name)) {
-            this.showInfo('Error', `Branch '${name}' not found.`);
-            return;
-        }
-
-        this.state.branch = name;
-        this.showInfo('Checkout', `🔄 Switched to branch '${name}'`);
-        // In a real app, we would swap out the 'local' commits array here.
-        // For this visualizer, we might just keep one shared history or mock it.
-        // Let's mock a context switch
-        this.renderAll();
-    }
-
-    async cmdMerge(cmd) {
-        const target = prompt("Merge which branch into current?");
-        if (!target) return;
-
-        if (!this.state.branches.includes(target)) {
-            this.showInfo('Error', `Branch '${target}' does not exist.`);
-            return;
-        }
-
-        if (target === this.state.branch) {
-            this.showInfo('Merge', 'Already up to date (Self-merge).');
-            return;
-        }
-
-        await this.animatePackage('zone-local', 'zone-local', '🔗');
-        this.state.commitCount++;
-        const newCommit = {
-            id: Math.random().toString(16).substr(2, 7),
-            msg: `Merge branch '${target}' into '${this.state.branch}'`,
-            files: []
-        };
-        this.state.files.local.push(newCommit);
-        this.renderAll();
-
-        this.showInfo('Merge Complete', `🔀 Merged '${target}' into '${this.state.branch}'.\nStrategies: Recursive.`);
-    }
-
 
 
     initEventListeners() {
@@ -196,9 +82,11 @@ index 14b8...e69de 100644
                 const tooltip = document.createElement('div');
                 tooltip.id = 'floating-tooltip';
                 tooltip.innerHTML = `<div class="tooltip-header">>> INFO_</div>${descEl.textContent}`;
+                const terminalPanel = document.querySelector('.terminal-panel');
+                const panelRight = terminalPanel ? terminalPanel.getBoundingClientRect().right + 10 : 400;
                 tooltip.style.cssText = `
                     position: fixed;
-                    left: 400px;
+                    left: ${panelRight}px;
                     top: ${e.clientY - 20}px;
                     width: 320px;
                     max-height: 220px;
@@ -237,9 +125,23 @@ index 14b8...e69de 100644
     reset() {
         this.state = {
             initialized: false,
-            files: { working: [], staging: [], local: [], remote: [] },
+            files: {
+                working: [],
+                staging: [],
+                local: [],
+                remote: []
+            },
+            remotes: {
+                origin: [],
+                upstream: []
+            },
+            activeRemote: 'upstream',
             branch: 'main',
-            commitCount: 0
+            branches: ['main'],
+            commitCount: 0,
+            user: { name: 'User', email: 'user@example.com' },
+            stash: [],
+            tags: []
         };
         this.renderAll();
         this.showInfo('Reset', 'Application state has been reset.');
@@ -283,8 +185,9 @@ index 14b8...e69de 100644
                 await this.cmdFetch();
                 break;
             case 'checkout':
+            case 'checkout-b':
             case 'switch':
-                await this.cmdCheckout();
+                await this.cmdCheckout(cmd);
                 break;
             case 'diff':
             case 'diff-staged':
@@ -295,11 +198,6 @@ index 14b8...e69de 100644
             case 'branch-create':
             case 'branch-delete':
                 await this.cmdBranch(cmd);
-                break;
-            case 'checkout':
-            case 'checkout-b':
-            case 'switch':
-                await this.cmdCheckout(cmd);
                 break;
             case 'merge':
             case 'merge-no-ff':
@@ -389,10 +287,6 @@ index 14b8...e69de 100644
             case 'push-tags':
                 this.cmdTag(cmd);
                 break;
-            case 'rebase':
-            case 'cherry-pick':
-
-                break;
             case 'clone':
                 this.showInfo('Clone', '📂 Repository cloned from remote URL. (Simulation)');
                 break;
@@ -414,6 +308,9 @@ index 14b8...e69de 100644
                 // All commands should be handled above
                 this.showInfo('Info', `Command "${cmd}" executed.`);
         }
+
+        // Advance scenario if active
+        this.advanceScenario(cmd);
     }
 
     // --- Command Implementations ---
@@ -808,7 +705,7 @@ index 14b8...e69de 100644
         this.state.commitCount++;
         const newCommit = {
             id: Math.random().toString(16).substr(2, 7),
-            msg: `Revert "Commit #${this.state.commitCount - 1}"`,
+            message: `Revert "Commit #${this.state.commitCount - 1}"`,
             files: []
         };
         this.state.files.local.push(newCommit);
@@ -942,14 +839,14 @@ index 14b8...e69de 100644
             await anim.delay(300);
 
             let history = '';
-            commits.slice(0, 5).forEach(c => history += `🔸 ${c.id} - ${c.msg}\n`);
+            commits.slice(0, 5).forEach(c => history += `🔸 ${c.id} - ${c.message}\n`);
             this.showInfo('Git Log (-n 5)', history + '\n(Older commits hidden)');
 
         } else if (cmd === 'log-author') {
             const author = "User";
             this.showInfo('Log', `🔍 Filtering by author: ${author}...`);
             await anim.delay(500);
-            this.showInfo('Git Log (--author)', `👤 Commits by ${author}:\n` + commits.map(c => `🔸 ${c.id} - ${c.msg}`).join('\n'));
+            this.showInfo('Git Log (--author)', `👤 Commits by ${author}:\n` + commits.map(c => `🔸 ${c.id} - ${c.message}`).join('\n'));
 
         } else if (cmd === 'log-grep') {
             const pattern = prompt("Enter search pattern:", "bug");
@@ -960,9 +857,9 @@ index 14b8...e69de 100644
             anim.glowPulse(localZone, 'yellow');
             await anim.delay(600);
 
-            const matches = commits.filter(c => c.msg && c.msg.includes(pattern));
+            const matches = commits.filter(c => c.message && c.message.includes(pattern));
             if (matches.length > 0) {
-                this.showInfo('Grep Matches', `🔍 Found ${matches.length} commits matching "${pattern}":\n` + matches.map(c => `🔸 ${c.id} - ${c.msg}`).join('\n'));
+                this.showInfo('Grep Matches', `🔍 Found ${matches.length} commits matching "${pattern}":\n` + matches.map(c => `🔸 ${c.id} - ${c.message}`).join('\n'));
             } else {
                 this.showInfo('Grep Matches', `No commits found with pattern "${pattern}".`);
             }
@@ -983,7 +880,7 @@ index 14b8...e69de 100644
                 <h3>Commit ${commit.id}</h3>
                 <p>👤 Author: ${this.state.user.name}</p>
                 <p>📅 Date: ${new Date().toLocaleDateString()}</p>
-                <p>💬 Message: "${commit.msg || commit.message}"</p>
+                <p>💬 Message: "${commit.message}"</p>
                 <hr style="border-color:#333"/>
                 <div style="font-size:12px; height:100px; overflow:auto; background:#111; padding:5px;">
                    diff --git a/file b/file<br>
@@ -1010,7 +907,7 @@ index 14b8...e69de 100644
 
             let output = '';
             commits.slice(0, 3).forEach(c => {
-                output += `🔸 ${c.id} "${c.msg}"\n   index.html | +12 --\n   style.css  | +5 -\n\n`;
+                output += `🔸 ${c.id} "${c.message}"\n   index.html | +12 --\n   style.css  | +5 -\n\n`;
             });
             this.showInfo('Git Log --stat', output + '(Showing last 3 for demo)');
 
@@ -1039,7 +936,7 @@ index 14b8...e69de 100644
             this.showInfo('Describe', `📍 ${tag}-${dist}-g${hash}\n\nTag: ${tag}\nCommits: ${dist} ahead`);
         } else {
             let history = '';
-            commits.forEach(c => history += `🔸 ${c.id} - ${c.msg}\n`);
+            commits.forEach(c => history += `🔸 ${c.id} - ${c.message}\n`);
             this.showInfo('Git Log', history);
         }
     }
@@ -1312,7 +1209,7 @@ HEAD@{3}: commit: Wip
             this.state.commitCount++;
             const newCommit = {
                 id: Math.random().toString(16).substr(2, 7),
-                msg: `Cherry-pick ${hash}`,
+                message: `Cherry-pick ${hash}`,
                 files: []
             };
             this.state.files.local.push(newCommit);
@@ -1475,76 +1372,6 @@ HEAD@{3}: commit: Wip
         const anim = window.animEngine;
         if (anim) anim.glowPulse(document.getElementById('zone-remote'), this.state.activeRemote === 'origin' ? '#00ff41' : '#58a6ff');
         this.showInfo('Remote Switch', `Switched to remote: ${this.state.activeRemote}`);
-    }
-
-    async cmdBranch(cmd) {
-        if (cmd === 'branch-list') {
-            this.createContextMenu(this.state.branches, (selected) => {
-                this.state.branch = selected.replace('* ', '').trim();
-                this.renderBranches();
-                this.renderAll(); // Re-render logic would go here
-                this.showInfo('Checkout', `🌿 Switched to branch ${this.state.branch}`);
-            });
-            return;
-        }
-
-        if (cmd === 'branch-create') {
-            // Method 1: Input Visual
-            const input = await this.createBranchInput();
-            if (!input) return;
-
-            if (this.state.branches.includes(input)) {
-                this.showInfo('Error', `Branch "${input}" already exists.`);
-                return;
-            }
-
-            const anim = window.animEngine;
-            this.showInfo('Branch', `🌿 Creating branch "${input}"...`);
-
-            const localZone = document.getElementById('zone-local');
-            const headCommit = localZone.lastElementChild;
-            if (headCommit && anim) {
-                const rect = headCommit.getBoundingClientRect();
-
-                // Timeline split animation
-                const split = document.createElement('div');
-                split.style.cssText = `position:fixed; left:${rect.left}px; top:${rect.top}px; width:2px; height:0px; background:#00ff41; z-index:5000; transform:rotate(45deg); transform-origin:top left;`;
-                document.body.appendChild(split);
-
-                await split.animate([{ height: '0px' }, { height: '50px' }], { duration: 500 }).finished;
-                split.remove();
-
-                anim.particles('sparkle', rect.left + rect.width / 2, rect.top + rect.height / 2, { color: '#00ff41' });
-            }
-
-            this.state.branches.push(input);
-            if (anim) await anim.delay(500);
-
-            this.renderBranches();
-            this.showInfo('Branch Created', `🌿 Branch "${input}" created.`);
-        } else if (cmd === 'branch-ui-templates') {
-            // Template Quick Pick
-            const templates = ['feature/login', 'bugfix/header', 'hotfix/db', 'docs/readme'];
-            this.createContextMenu(templates, (selected) => {
-                this.state.branches.push(selected);
-                this.renderBranches();
-                this.showInfo('Branch Created', `🌿 Created ${selected} from template.`);
-            });
-        } else if (cmd === 'branch-delete') {
-            const name = prompt("Enter branch name to delete:", "");
-            if (!name) return;
-            if (name === this.state.branch) {
-                this.showInfo('Error', 'Cannot delete currently active branch.');
-                return;
-            }
-            if (!this.state.branches.includes(name)) {
-                this.showInfo('Error', 'Branch not found.');
-                return;
-            }
-            this.state.branches = this.state.branches.filter(b => b !== name);
-            this.renderBranches();
-            this.showInfo('Branch Deleted', `🗑️ Branch "${name}" deleted.`);
-        }
     }
 
     // UI Helpers
@@ -1717,7 +1544,7 @@ origin  https://github.com/user/repo.git (push)
         }
 
         if (cmd === 'branch-create') {
-            const name = prompt("Enter new branch name:", "feature-login");
+            const name = await this.createBranchInput();
             if (!name) return;
             if (this.state.branches.includes(name)) {
                 this.showInfo('Error', `Branch "${name}" already exists.`);
@@ -2034,34 +1861,46 @@ index 83db48f..f735c2d 100644
         });
     }
 
-    updateCommandStates() {
-        // Define which commands are available in each state
+    getSuggestedCommand() {
+        // If a scenario is active, the scenario controls suggestions
+        if (this.activeScenario && this.currentStepIndex < this.activeScenario.steps.length) {
+            return this.activeScenario.steps[this.currentStepIndex].cmd;
+        }
+
         const state = this.state;
+        if (!state.initialized) return 'init';
+        if (state.files.working.length > 0 && state.files.staging.length === 0) return 'add-all';
+        if (state.files.staging.length > 0 && state.files.local.length === 0) return 'commit';
+        if (state.files.staging.length > 0) return 'commit';
+        if (state.files.local.length > 0 && state.files.remote.length === 0) return 'push';
+        if (state.files.local.length > state.files.remote.length) return 'push';
+        return null;
+    }
+
+    updateCommandStates() {
+        const state = this.state;
+        const suggested = this.getSuggestedCommand();
 
         document.querySelectorAll('.cmd-btn').forEach(btn => {
             const cmd = btn.dataset.cmd;
-            btn.classList.remove('error', 'available');
+            btn.classList.remove('error', 'available', 'suggested');
 
-            // Determine if command would work
             let isAvailable = true;
             let requiresInit = true;
 
-            // Commands that work without init
             const noInitRequired = ['init', 'clone', 'config-user', 'config-list', 'alias'];
             if (noInitRequired.includes(cmd)) {
                 requiresInit = false;
             }
 
-            // Check if init is required but not done
             if (requiresInit && !state.initialized) {
                 isAvailable = false;
             }
 
-            // Check specific command requirements
             if (state.initialized) {
                 switch (cmd) {
                     case 'init':
-                        isAvailable = false; // Already initialized
+                        isAvailable = false;
                         break;
                     case 'add-all':
                     case 'add-file':
@@ -2116,13 +1955,23 @@ index 83db48f..f735c2d 100644
                 }
             }
 
-            // Apply classes
             if (isAvailable) {
                 btn.classList.add('available');
+                if (cmd === suggested) {
+                    btn.classList.add('suggested');
+                }
             } else {
                 btn.classList.add('error');
             }
         });
+
+        // Update flow arrows
+        const arrowAdd = document.getElementById('arrow-add');
+        const arrowCommit = document.getElementById('arrow-commit');
+        const arrowPush = document.getElementById('arrow-push');
+        if (arrowAdd) arrowAdd.classList.toggle('active', suggested === 'add-all');
+        if (arrowCommit) arrowCommit.classList.toggle('active', suggested === 'commit');
+        if (arrowPush) arrowPush.classList.toggle('active', suggested === 'push');
     }
 
     renderZone(zoneName) {
@@ -2166,7 +2015,7 @@ index 83db48f..f735c2d 100644
                     <div class="commit-hash" style="display:flex; justify-content:space-between;">
                         <span>${commit.id}</span>
                     </div>
-                    <div class="commit-msg">${commit.msg}</div>
+                    <div class="commit-msg">${commit.message}</div>
                 `;
                 container.appendChild(el);
             });
@@ -2233,16 +2082,18 @@ index 83db48f..f735c2d 100644
 
     showInfo(title, text) {
         this.infoBox.title.textContent = title;
-        this.infoBox.text.textContent = text; // or innerHTML if we need newlines
+        this.infoBox.text.textContent = text;
         this.infoBox.text.innerHTML = text.replace(/\n/g, '<br>');
 
         this.infoBox.el.classList.remove('hidden');
 
-        // Auto hide after 5 seconds
+        // Auto hide - duration based on content length (min 4s, max 15s)
+        const wordCount = text.split(/\s+/).length;
+        const duration = Math.min(Math.max(wordCount * 300, 4000), 15000);
         if (this.infoTimeout) clearTimeout(this.infoTimeout);
         this.infoTimeout = setTimeout(() => {
             this.hideInfo();
-        }, 5000);
+        }, duration);
     }
 
     hideInfo() {
@@ -2313,6 +2164,201 @@ index 83db48f..f735c2d 100644
                 }
             });
         }, 100);
+    }
+
+    // =============================================
+    // SCENARIO / GUIDED LEARNING SYSTEM
+    // =============================================
+
+    initScenarios() {
+        this.scenarios = [
+            {
+                id: 'first-commit',
+                title: 'Your First Commit',
+                desc: 'Learn the basic Git workflow: init, add, commit',
+                steps: [
+                    { cmd: 'init', instruction: 'Start by initializing a Git repository.' },
+                    { cmd: 'add-all', instruction: 'Stage all files for your first commit.' },
+                    { cmd: 'commit', instruction: 'Create your first commit with a message.' }
+                ]
+            },
+            {
+                id: 'push-to-remote',
+                title: 'Push to Remote',
+                desc: 'Complete workflow: init, add, commit, push to GitHub',
+                steps: [
+                    { cmd: 'init', instruction: 'Initialize a new repository.' },
+                    { cmd: 'add-all', instruction: 'Stage your files.' },
+                    { cmd: 'commit', instruction: 'Commit your changes.' },
+                    { cmd: 'remote-add', instruction: 'Connect to a remote server (GitHub).' },
+                    { cmd: 'push', instruction: 'Push your commits to the remote repository.' }
+                ]
+            },
+            {
+                id: 'branch-merge',
+                title: 'Branch & Merge',
+                desc: 'Create a feature branch, work on it, and merge back',
+                steps: [
+                    { cmd: 'init', instruction: 'Initialize the repository.' },
+                    { cmd: 'add-all', instruction: 'Stage files.' },
+                    { cmd: 'commit', instruction: 'Make an initial commit on main.' },
+                    { cmd: 'branch-create', instruction: 'Create a new feature branch.' },
+                    { cmd: 'checkout', instruction: 'Switch to your new branch.' },
+                    { cmd: 'checkout', instruction: 'Switch back to main to merge.' },
+                    { cmd: 'merge', instruction: 'Merge the feature branch into main.' }
+                ]
+            },
+            {
+                id: 'undo-mistakes',
+                title: 'Undoing Mistakes',
+                desc: 'Learn how to undo changes at every stage',
+                steps: [
+                    { cmd: 'init', instruction: 'Initialize the repository.' },
+                    { cmd: 'add-all', instruction: 'Stage all files.' },
+                    { cmd: 'restore-staged', instruction: 'Unstage files — move them back to working directory.' },
+                    { cmd: 'add-all', instruction: 'Stage them again.' },
+                    { cmd: 'commit', instruction: 'Commit the changes.' },
+                    { cmd: 'reset', instruction: 'Undo the commit but keep changes in working directory.' }
+                ]
+            },
+            {
+                id: 'stash-workflow',
+                title: 'Stashing Changes',
+                desc: 'Save work temporarily and restore it later',
+                steps: [
+                    { cmd: 'init', instruction: 'Initialize the repository.' },
+                    { cmd: 'stash', instruction: 'Stash your current changes to save them temporarily.' },
+                    { cmd: 'stash-list', instruction: 'Check your stash list.' },
+                    { cmd: 'stash-pop', instruction: 'Restore your stashed changes.' }
+                ]
+            }
+        ];
+
+        this.activeScenario = null;
+        this.currentStepIndex = 0;
+
+        // Render scenario list
+        this.renderScenarioList();
+
+        // Event listeners for scenario UI
+        const toggleBtn = document.getElementById('scenarioToggle');
+        const closeBtn = document.getElementById('scenarioClose');
+        const quitBtn = document.getElementById('stepQuit');
+        const panel = document.getElementById('scenarioPanel');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                panel.classList.toggle('hidden');
+            });
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                panel.classList.add('hidden');
+            });
+        }
+        if (quitBtn) {
+            quitBtn.addEventListener('click', () => {
+                this.quitScenario();
+            });
+        }
+    }
+
+    renderScenarioList() {
+        const list = document.getElementById('scenarioList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        this.scenarios.forEach(scenario => {
+            const el = document.createElement('div');
+            el.className = 'scenario-item';
+            el.innerHTML = `
+                <div class="scenario-item-title">${scenario.title}</div>
+                <div class="scenario-item-desc">${scenario.desc}</div>
+                <div class="scenario-item-steps">${scenario.steps.length} steps</div>
+            `;
+            el.addEventListener('click', () => {
+                this.startScenario(scenario);
+            });
+            list.appendChild(el);
+        });
+    }
+
+    startScenario(scenario) {
+        // Reset state first
+        this.reset();
+        this.activeScenario = scenario;
+        this.currentStepIndex = 0;
+
+        // Hide scenario panel, show step bar
+        document.getElementById('scenarioPanel').classList.add('hidden');
+        document.getElementById('scenarioStepBar').classList.remove('hidden');
+
+        this.renderCurrentStep();
+        this.updateCommandStates();
+        this.showInfo('Scenario Started', `"${scenario.title}"\n\nFollow the highlighted commands step by step.`);
+    }
+
+    renderCurrentStep() {
+        if (!this.activeScenario) return;
+
+        const step = this.activeScenario.steps[this.currentStepIndex];
+        const titleEl = document.getElementById('stepTitle');
+        const progressEl = document.getElementById('stepProgress');
+        const instructionEl = document.getElementById('stepInstruction');
+
+        titleEl.textContent = this.activeScenario.title;
+        progressEl.textContent = `Step ${this.currentStepIndex + 1} / ${this.activeScenario.steps.length}`;
+        instructionEl.textContent = step.instruction;
+
+        // Highlight the expected command and scroll to it
+        document.querySelectorAll('.cmd-btn').forEach(btn => {
+            btn.classList.remove('suggested');
+            if (btn.dataset.cmd === step.cmd) {
+                btn.classList.add('suggested');
+                btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+
+    advanceScenario(executedCmd) {
+        if (!this.activeScenario) return;
+
+        const step = this.activeScenario.steps[this.currentStepIndex];
+        if (executedCmd !== step.cmd) return;
+
+        this.currentStepIndex++;
+
+        if (this.currentStepIndex >= this.activeScenario.steps.length) {
+            this.completeScenario();
+            return;
+        }
+
+        this.renderCurrentStep();
+    }
+
+    completeScenario() {
+        const anim = window.animEngine;
+        if (anim) {
+            anim.confetti(window.innerWidth / 2, window.innerHeight / 2, 40);
+        }
+
+        this.showInfo('Scenario Complete!',
+            `You completed "${this.activeScenario.title}"!\n\nYou now understand this Git workflow. Try another scenario or explore commands freely.`
+        );
+
+        this.activeScenario = null;
+        this.currentStepIndex = 0;
+        document.getElementById('scenarioStepBar').classList.add('hidden');
+        this.updateCommandStates();
+    }
+
+    quitScenario() {
+        this.activeScenario = null;
+        this.currentStepIndex = 0;
+        document.getElementById('scenarioStepBar').classList.add('hidden');
+        document.querySelectorAll('.cmd-btn').forEach(btn => btn.classList.remove('suggested'));
+        this.updateCommandStates();
+        this.showInfo('Scenario Quit', 'Scenario cancelled. You can explore commands freely.');
     }
 }
 
