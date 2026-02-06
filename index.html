@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Git Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- LEFT PANEL: Command Terminal -->
+        <aside class="panel terminal-panel">
+            <div class="terminal-header">
+                <div class="window-controls">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-title">Git Commands</div>
+            </div>
+
+            <div class="terminal-content" id="commandList">
+                <!-- 🚀 GETTING STARTED -->
+                <div class="category-header">🚀 Getting Started</div>
+                <button class="cmd-btn" data-cmd="init">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git init <div class="cmd-desc">Creates a new Git repository in current folder.
+                            Initializes .git directory and enables version tracking. Use when starting a new project.
+                        </div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="clone">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git clone [url] <div class="cmd-desc">Copies a remote repository to your
+                            computer. Downloads all files, branches, and commit history. Creates a ready-to-work local
+                            copy.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="config-user">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git config user.name <div class="cmd-desc">Sets your Git username. This name
+                            appears in all your commits. Required for first-time Git setup.</div>
+                    </div>
+                </button>
+
+                <!-- 📝 BASIC OPERATIONS -->
+                <div class="category-header">📝 Basic Operations</div>
+                <button class="cmd-btn" data-cmd="status">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git status <div class="cmd-desc">Shows which files are modified, staged, or
+                            untracked. Displays current branch name. Essential for checking your work before committing.
+                        </div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="add-all">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git add . <div class="cmd-desc">Stages ALL changes (new, modified, deleted
+                            files) for commit. Prepares everything in one command. Use when you want to commit all your
+                            work.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="add-file">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git add [file] <div class="cmd-desc">Stages a specific file for commit. Allows
+                            selective commits. Use when only certain files are ready.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="commit">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git commit -m "msg" <div class="cmd-desc">Saves staged changes permanently
+                            with a message. Creates a snapshot in project history. Each commit gets a unique hash ID.
+                        </div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="commit-am">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git commit -am "msg" <div class="cmd-desc">Combines add + commit for tracked
+                            files only. Stages and commits modified files in one step. ⚠️ Does NOT add new untracked
+                            files!</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="diff">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git diff <div class="cmd-desc">Shows line-by-line changes in working
+                            directory. Red (-) = deleted, Green (+) = added. Review your code before staging.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="diff-staged">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git diff --staged <div class="cmd-desc">Shows changes that are staged for
+                            commit. Preview what will be in your next commit. Last check before committing.</div>
+                    </div>
+                </button>
+
+                <!-- 📤 REMOTE OPERATIONS -->
+                <div class="category-header">📤 Remote Operations</div>
+                <button class="cmd-btn" data-cmd="remote-add">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git remote add <div class="cmd-desc">Links your local repo to a remote server
+                            (GitHub/GitLab). Creates "origin" reference. Required before first push.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="push">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git push origin main <div class="cmd-desc">Uploads your commits to remote
+                            repository. Makes your code available to team. Also serves as backup.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="push-u">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git push -u origin <div class="cmd-desc">Pushes and sets upstream tracking.
+                            After this, just "git push" works. Use for first push of a new branch.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="pull">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git pull origin main <div class="cmd-desc">Downloads AND merges remote
+                            changes. Syncs your local with remote. Combines fetch + merge in one command.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="fetch">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git fetch <div class="cmd-desc">Downloads remote changes but does NOT merge.
+                            Safe way to see what's new. You decide when to merge.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="fetch-all">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git fetch --all <div class="cmd-desc">Fetches from ALL configured remotes.
+                            Updates all remote tracking branches. Use with multiple remotes.</div>
+                    </div>
+                </button>
+
+                <!-- 🌿 BRANCHING & MERGING -->
+                <div class="category-header">🌿 Branching & Merging</div>
+                <button class="cmd-btn" data-cmd="branch-list">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git branch <div class="cmd-desc">Lists all local branches. Current branch
+                            marked with *. See your available development lines.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="branch-create">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git branch [name] <div class="cmd-desc">Creates a new branch from current
+                            HEAD. Does NOT switch to it automatically. Use for parallel development.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="branch-delete">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git branch -d [name] <div class="cmd-desc">Safely deletes a merged branch.
+                            Fails if branch has unmerged changes. Clean up after feature completion.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="checkout">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git checkout [branch] <div class="cmd-desc">Switches to another branch.
+                            Updates working directory to match. Your files change to that branch's state.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="checkout-b">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git checkout -b [branch] <div class="cmd-desc">Creates new branch AND switches
+                            to it. Two commands in one. Quick way to start new feature work.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="switch">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git switch [branch] <div class="cmd-desc">Modern command for switching
+                            branches. Clearer than checkout. Recommended for branch switching.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="merge">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git merge [branch] <div class="cmd-desc">Combines specified branch into
+                            current branch. Integrates parallel development. Creates merge commit if needed.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="merge-no-ff">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git merge --no-ff <div class="cmd-desc">Forces a merge commit even if
+                            fast-forward possible. Preserves branch history. Better for tracking features.</div>
+                    </div>
+                </button>
+
+                <!-- ⏪ UNDOING CHANGES -->
+                <div class="category-header">⏪ Undoing Changes</div>
+                <button class="cmd-btn" data-cmd="restore">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git restore [file] <div class="cmd-desc">Discards uncommitted changes in
+                            working directory. Reverts file to last commit state. ⚠️ Changes are LOST forever!</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="restore-staged">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git restore --staged <div class="cmd-desc">Removes file from staging area.
+                            Changes stay in working directory. "Undo" for accidental git add.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="reset">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git reset HEAD~1 <div class="cmd-desc">Undoes last commit, keeps changes in
+                            working directory. Commit removed from history. Good for fixing mistakes.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="reset-soft">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git reset --soft <div class="cmd-desc">Undoes commit but keeps changes staged.
+                            Ready to re-commit immediately. Use to fix commit message or add files.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="reset-hard">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git reset --hard <div class="cmd-desc">⚠️ DANGEROUS! Completely removes commit
+                            AND all changes. No recovery possible. Use only when absolutely sure.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="revert">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git revert [commit] <div class="cmd-desc">Creates NEW commit that undoes a
+                            previous commit. Safe for shared branches. History preserved, not rewritten.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="clean">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git clean -fd <div class="cmd-desc">Removes untracked files and directories.
+                            Cleans up build artifacts, temp files. ⚠️ Deleted files cannot be recovered!</div>
+                    </div>
+                </button>
+
+                <!-- 💾 STASHING -->
+                <div class="category-header">💾 Stashing</div>
+                <button class="cmd-btn" data-cmd="stash">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git stash <div class="cmd-desc">Temporarily saves uncommitted changes. Cleans
+                            working directory. Perfect when you need to switch branches urgently.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="stash-pop">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git stash pop <div class="cmd-desc">Restores most recent stash and REMOVES it
+                            from stash list. One-time restore. Use when returning to your work.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="stash-list">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git stash list <div class="cmd-desc">Shows all saved stashes. Multiple stashes
+                            possible. Check what you've saved before restoring.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="stash-clear">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git stash clear <div class="cmd-desc">Deletes ALL stashes permanently. Bulk
+                            cleanup. ⚠️ All stashed work is lost forever!</div>
+                    </div>
+                </button>
+
+                <!-- 🏷️ TAGS -->
+                <div class="category-header">🏷️ Tags & Releases</div>
+                <button class="cmd-btn" data-cmd="tag-list">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git tag <div class="cmd-desc">Lists all existing tags. Shows version markers
+                            in your project. Check available release points.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="tag-create">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git tag v1.0.0 <div class="cmd-desc">Creates a tag on current commit. Marks
+                            important points like releases. Convention: v1.0.0 (major.minor.patch)</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="push-tags">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git push --tags <div class="cmd-desc">Uploads all local tags to remote. Makes
+                            releases visible on GitHub. Required for proper version tracking.</div>
+                    </div>
+                </button>
+
+                <!-- 📜 HISTORY -->
+                <div class="category-header">📜 History & Logs</div>
+                <button class="cmd-btn" data-cmd="log">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git log <div class="cmd-desc">Shows complete commit history. Displays hash,
+                            author, date, message. Navigate project evolution.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="log-oneline">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git log --oneline <div class="cmd-desc">Compact commit history, one line each.
+                            Quick overview of many commits. Easier to scan through history.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="log-graph">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git log --graph <div class="cmd-desc">Visual ASCII branch diagram. Shows
+                            branch/merge structure. Great for understanding complex histories.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="show">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git show [commit] <div class="cmd-desc">Displays detailed info about specific
+                            commit. Shows diff, author, date, message. Inspect any commit in detail.</div>
+                    </div>
+                </button>
+
+                <!-- 🔧 CONFIG -->
+                <div class="category-header">🔧 Configuration</div>
+                <button class="cmd-btn" data-cmd="config-list">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git config --list <div class="cmd-desc">Shows all Git configuration settings.
+                            Displays user, email, editor, aliases. Review your Git setup.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="alias">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git config alias <div class="cmd-desc">Creates command shortcuts. Example:
+                            alias.st=status. Type less, work faster.</div>
+                    </div>
+                </button>
+
+                <!-- 🔗 ADVANCED -->
+                <div class="category-header">🔗 Advanced</div>
+                <button class="cmd-btn" data-cmd="cherry-pick">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git cherry-pick <div class="cmd-desc">Copies specific commit to current
+                            branch. Selective commit transfer. Pick individual changes without merging entire branch.
+                        </div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="rebase">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">git rebase main <div class="cmd-desc">Replays your commits on top of another
+                            branch. Creates linear history. ⚠️ Never use on public/shared branches!</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="fork">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">Fork (GitHub) <div class="cmd-desc">Creates personal copy of someone else's
+                            repository. Start point for contributing to open source. Done on GitHub, not Git.</div>
+                    </div>
+                </button>
+                <button class="cmd-btn" data-cmd="pr">
+                    <span class="cmd-prefix">$</span>
+                    <div class="cmd-text">Pull Request <div class="cmd-desc">Proposes merging your changes into original
+                            repo. Code review workflow. Collaboration between developers.</div>
+                    </div>
+                </button>
+            </div>
+        </aside>
+
+        <!-- RIGHT PANEL: Visualization Area -->
+        <main class="panel visual-panel">
+            <div class="visual-header">
+                <div class="header-left">
+                    <h1>Git Workflow Visualizer</h1>
+                    <p>Watch how Git commands work in real-time</p>
+                </div>
+                <!-- ACTIVE BRANCHES BAR -->
+                <div class="branch-bar" id="branchViz">
+                    <!-- Branch items injected by JS -->
+                </div>
+                <button class="reset-btn" id="resetBtn">
+                    <i class="ph ph-arrow-counter-clockwise"></i> Reset
+                </button>
+            </div>
+
+            <div class="cards-grid">
+                <!-- Zone 1: Working Directory -->
+                <div class="zone-card" id="zone-working">
+                    <div class="card-header">
+                        <span class="zone-icon"><i class="ph ph-folder"></i></span>
+                        <h3>Working Directory</h3>
+                    </div>
+                    <div class="file-container" id="files-working">
+                        <!-- Files injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Zone 2: Staging Area -->
+                <div class="zone-card" id="zone-staging">
+                    <div class="card-header">
+                        <span class="zone-icon"><i class="ph ph-package"></i></span>
+                        <h3>Staging Area</h3>
+                    </div>
+                    <div class="file-container" id="files-staging">
+                        <!-- Files injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Zone 3: Local Repository -->
+                <div class="zone-card" id="zone-local">
+                    <div class="card-header">
+                        <span class="zone-icon"><i class="ph ph-floppy-disk"></i></span>
+                        <h3>Local Repository</h3>
+                    </div>
+                    <div class="file-container" id="files-local">
+                        <!-- Files injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Zone 4: Remote Repository -->
+                <div class="zone-card full-width" id="zone-remote">
+                    <div class="card-header">
+                        <span class="zone-icon"><i class="ph ph-cloud"></i></span>
+                        <h3>Remote Repository (GitHub)</h3>
+                    </div>
+                    <div class="file-container" id="files-remote">
+                        <!-- Files injected by JS -->
+                    </div>
+                    <div class="remote-watermark">
+                        <i class="ph ph-github-logo"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification / Info Box -->
+            <div class="info-box hidden" id="infoBox">
+                <div class="info-icon">
+                    <i class="ph ph-info"></i>
+                </div>
+                <div class="info-content">
+                    <h4 id="infoTitle">Command Info</h4>
+                    <p id="infoText">Description of what just happened.</p>
+                </div>
+                <button class="close-info" id="closeInfoBtn">
+                    <i class="ph ph-x"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="animations.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
