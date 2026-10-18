@@ -1,135 +1,94 @@
 # Git Visualizer
 
-An interactive web application that helps you learn Git commands through visual animations.
+An interactive web app that teaches Git commands through visual animations.
 
-🔗 **Live Demo:** [learngit.tech](https://learngit.tech)
+**Live demo:** [learngit.tech](https://learngit.tech)
 
----
+## Overview
 
-## What is this?
+Git Visualizer shows what a Git command actually does instead of describing it. Click a command and watch files and commits move between the four zones of the Git workflow:
 
-Git Visualizer shows you how Git commands work in real-time. Instead of reading documentation, you can see the actual workflow with animations.
+**Working Directory → Staging Area → Local Repository → Remote Repository**
 
-**Perfect for:**
+Good for:
 - Learning Git for the first time
-- Understanding how Git works internally
+- Building a mental model of how Git works internally
 - Teaching Git to others
-
----
 
 ## Features
 
-**70+ Animated Git Commands**
-- Basic operations: `add`, `commit`, `push`, `pull`
-- Branching: `branch`, `checkout`, `merge`, `rebase`
-- Undoing changes: `reset`, `revert`, `restore`
-- Advanced: `stash`, `cherry-pick`, `reflog`, and more
+- **48 animated commands** in a terminal-style panel, grouped into 10 categories, each with a short plain-English description
+- **Four-zone visualization** of working directory, staging area, local repo and remote repo
+- **Guided scenarios** (the "Learn" button): step-by-step lessons for Your First Commit, Push to Remote, Branch & Merge, Undoing Mistakes and Stashing Changes
+- **Quick command palette** with `Ctrl+B`
+- **Dark, terminal-inspired design** with glassmorphism panels
 
-**Visual Workflow**
-- Working Directory → Staging Area → Local Repository → Remote Repository
-- See files move between zones
-- Understand the Git flow visually
-
-**Dark Theme**
-- Matrix-inspired terminal design
-- Easy on the eyes
-
----
-
-## Quick Start
-
-**Use Online:**
-Visit [learngit.tech](https://learngit.tech) - no installation needed.
-
-**Run Locally:**
-```bash
-git clone https://github.com/mertcaneren0/interactive-git-visualizer.git
-cd interactive-git-visualizer
-open index.html
-```
-
-No dependencies required. Just HTML, CSS, and JavaScript.
-
----
-
-## How to Use
-
-1. Click a Git command from the left panel
-2. Watch the animation on the right
-3. Read the explanation below
-4. Try different commands to see how they interact
-
----
-
-## Tech Stack
-
-- HTML5
-- CSS3 (animations, glassmorphism effects)
-- Vanilla JavaScript (no frameworks)
-
----
-
-## Supported Commands
+## Commands in the panel
 
 <details>
-<summary>View all commands (click to expand)</summary>
+<summary>Show all commands</summary>
 
-**Getting Started**
-- `git init`, `git clone`, `git config`
+**Getting Started**: `init`, `clone`, `config user`
 
-**Basic Operations**
-- `git status`, `git add`, `git commit`, `git diff`, `git log`
+**Basic Operations**: `status`, `add .`, `add <file>`, `commit`, `commit -am`, `diff`, `diff --staged`
 
-**Remote Operations**
-- `git push`, `git pull`, `git fetch`, `git remote`
+**Remote Operations**: `remote add`, `push`, `push -u`, `pull`, `fetch`, `fetch --all`
 
-**Branching & Merging**
-- `git branch`, `git checkout`, `git switch`, `git merge`, `git rebase`
+**Branching & Merging**: `branch` (list / create / delete), `checkout`, `checkout -b`, `switch`, `merge`, `merge --no-ff`
 
-**Undoing Changes**
-- `git reset`, `git revert`, `git restore`, `git clean`
+**Undoing Changes**: `restore`, `restore --staged`, `reset`, `reset --soft`, `reset --hard`, `revert`, `clean`
 
-**Stashing**
-- `git stash`, `git stash pop`, `git stash list`, `git stash apply`
+**Stashing**: `stash`, `stash pop`, `stash list`, `stash clear`
 
-**Tags**
-- `git tag`, `git push --tags`
+**Tags & Releases**: `tag` (list / create), `push --tags`
 
-**History**
-- `git log`, `git show`, `git blame`, `git reflog`
+**History & Logs**: `log`, `log --oneline`, `log --graph`, `show`
 
-**Advanced**
-- `git cherry-pick`, `git bisect`, `git submodule`, `git worktree`
+**Configuration**: `config --list`, aliases
 
-And more...
+**Advanced**: `cherry-pick`, `rebase`, plus GitHub fork and pull request flows
 
 </details>
 
----
+## Tech stack
+
+- HTML5
+- CSS3 (animations, glassmorphism)
+- Vanilla JavaScript, no framework and no build step
+- Google Fonts (Inter, JetBrains Mono) and Phosphor Icons via CDN
+
+## Project structure
+
+```
+index.html      # Layout: command panel, scenario panel, visualization zones
+styles.css      # Theme, layout and animation styles
+script.js       # GitVisualizer class: repo state, command handlers, scenarios, command palette
+animations.js   # AnimationEngine: moves files and commits between zones
+```
+
+## Getting started
+
+No dependencies to install. Clone the repo and open `index.html` in a browser:
+
+```bash
+git clone https://github.com/mertcaneren0/interactive-git-visualizer.git
+cd interactive-git-visualizer
+open index.html    # macOS; on Windows use: start index.html
+```
+
+An internet connection is needed for the fonts and icons loaded from CDNs.
+
+## How to use
+
+1. Pick a command from the left panel (or press `Ctrl+B` and type one)
+2. Watch the animation on the right
+3. Read the explanation that appears
+4. Try a guided scenario from the "Learn" button to practice a full workflow
 
 ## Contributing
 
-Contributions are welcome! Here's how:
-
-1. Fork the repository
-2. Create your branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/my-feature`
-5. Open a Pull Request
-
-**Ideas for contributions:**
-- Add new commands
-- Improve animations
-- Fix bugs
-- Translate to other languages
-- Write documentation
+Ideas and pull requests are welcome: new commands, better animations, bug fixes or translations.
 
 ---
 
-## Support
-
-If you find this helpful, feel free to star ⭐ the repository. 
-
-Who knows, maybe someone will stumble upon it someday and learn something new.
-
----
+Built by [Mertcan Eren](https://github.com/mertcaneren0)
